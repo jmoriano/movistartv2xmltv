@@ -25,12 +25,12 @@ from xml.etree.ElementTree import Element, SubElement, Comment, ElementTree
 
 from tva import TvaStream, TvaParser
 
-logger = logging.getLogger('movistarxmltv')
+logger = logging.getLogger('movistarxmltv'+str(os.getpid()))
 logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler('/tmp/movistar.log')
 fh.setLevel(logging.INFO)
 ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
+ch.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
@@ -144,7 +144,7 @@ for package in TVPACKAGES:
     clist[channel] = rawclist[channel]
     clist[channel]["order"] = channelspackages[package][channel]["order"]
   
-channelsm3u = channelparser.channels2m3u(clist)
+channelsm3u = channelparser.channels2m3usimple(clist)
 if os.path.isfile(FILE_M3U+"_client.m3u"):
       os.remove(FILE_M3U+"_client.m3u")
 fM3u = open(FILE_M3U+"_client.m3u", 'w+')

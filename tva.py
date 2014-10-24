@@ -143,10 +143,10 @@ class TvaParser(object):
             channelIp = clist[channelid]["address"]
             channelPort = str(clist[channelid]["port"])
             channelLogo = clist[channelid]["logo"]
-            cChannel = SubElement(xmltv,'channel',{"id": channelName })
+            cChannel = SubElement(xmltv,'channel',{"id": channelKey })
             cName = SubElement(cChannel, "display-name", {"lang":"es"})
             cicon = SubElement(cChannel, "icon", {"src": channelLogo })
-            cName.text = channelKey
+            cName.text = channelName
         return xmltv
 
     def channels2m3u(self,clist):
@@ -167,6 +167,25 @@ class TvaParser(object):
             m3ucontent += "#EXTTV:"+','.join(channelTags)+";es;"+channelKey+";"+channelLogo+'\n'
             m3ucontent += "rtp://@" + channelIp + ":" + channelPort + '\n'
         return m3ucontent
+
+    def channels2m3usimple(self,clist):
+        m3ucontent = "#EXTM3U\n"
+        for channelid in sorted(clist, key=lambda key: int(clist[key]["order"])):
+            channelName = clist[channelid]["name"]
+            channelId = channelid
+            channelKey = clist[channelid]["shortname"]
+            channelIp = clist[channelid]["address"]
+            channelPort = str(clist[channelid]["port"])
+            channelTags = clist[channelid]["tags"]
+            try:
+                channelOrder = clist[channelid]["order"]
+            except:
+                channelOrder = "99999"
+            channelLogo = clist[channelid]["logo"]
+            m3ucontent += "#EXTINF:-1 tvg-id=\""+channelKey+"\" tvg-logo=\""+channelid+".jpg\", "+ channelName + '\n'
+            m3ucontent += "rtp://@" + channelIp + ":" + channelPort + '\n'
+        return m3ucontent
+
 
     def parseepg(self,xmltv,clist):
         try:
@@ -217,8 +236,11 @@ class TvaParser(object):
                 stopTime = stopTimePy.strftime('%Y%m%d%H%M%S') # Stop time
 
             url ='http://www-60.svc.imagenio.telefonica.net:2001/appserver/mvtv.do?action=getEpgInfo&extInfoID='+ programmeId +'&tvWholesaler=1'
-            strProgramme = urllib.urlopen(url).read().replace('\n',' ')
-	    jsonProgramme = json.loads(strProgramme)['resultData']
+	    try:
+              strProgramme = urllib.urlopen(url).read().replace('\n',' ')
+	      jsonProgramme = json.loads(strProgramme)['resultData']
+            except:
+              jsonProgramme = {}
             #   Genre can be also got from the extra information
             #    s = strProgramme[:]
             #    genre = s.split('"genre":"')[1].split('","')[0] # Genre
@@ -289,7 +311,12 @@ class TvaParser(object):
                 category = subgenre
             elif genre is None:
                 category = genre
-
+            json_data=open("mapeo.json").read()
+            categorias = json.loads(json_data)
+            
+            if categorias.get(category) is not None:
+                category = categorias.get(category)
+           
             if len(extra) > 2:
                 extra = extra + " | "
 

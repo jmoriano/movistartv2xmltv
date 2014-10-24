@@ -22,11 +22,12 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 
-if len(sys.argv) > 1:
+if len(sys.argv) > 2:
     IP = sys.argv[1]
+    MCAST_PORT = int(sys.argv[2])
     print "Download xml files into /tmp/: "+IP
 else:
-    print "Usage: "+ sys.argv[0]+' MULTICAST_GROUP'
+    print "Usage: "+ sys.argv[0]+' MULTICAST_GROUP PORT' 
     exit()
 
 logger.info("Getting xmls")
