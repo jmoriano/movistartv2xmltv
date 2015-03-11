@@ -29,7 +29,7 @@ from tva import TvaStream, TvaParser
 
 def parse_day(n,xmltv,rawclist):
     i = n + 130
-    logger.info("\nReading day " + str(i - 130) +"\n")
+    logger.info("Reading day " + str(i - 130))
     epgstream = TvaStream('239.0.2.'+str(i),config['mcast_port'])
     epgstream.getfiles()
     for i in epgstream.files().keys():
@@ -129,7 +129,7 @@ else:
     # log to console
     if not args.quiet:
         ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
+        ch.setLevel(logging.ERROR)
         ch.setFormatter(formatter)
         logger.addHandler(ch)
 
@@ -142,8 +142,11 @@ else:
         config['tvpackages'] = clientprofile["tvPackages"].split("|")
         config['mcast_grp_start'] = platformprofile["dvbConfig"]["dvbEntryPoint"].split(":")[0]
         config['mcast_port'] = int(platformprofile["dvbConfig"]["dvbEntryPoint"].split(":")[1])
-        with open('tv_grab_es_movistar.config', 'w') as outfile:
-            json.dump(config, outfile)
+        try:
+            with open('tv_grab_es_movistar.config', 'w') as outfile:
+                json.dump(config, outfile)
+        except:
+            logger.info("Config file can not be saved") 
  
     logger.info("Init. DEM="+str(config['demarcation'])+" TVPACKS="+str(config['tvpackages'])+" ENTRY_MCAST="+str(config['mcast_grp_start'])+":"+str(config['mcast_port']))
 
@@ -181,7 +184,7 @@ else:
     # If m3u arg create m3u and exit
     if args.m3u:
         clist = {}
-        for package in TVPACKAGES:
+        for package in config['tvpackages']:
             for channel in channelspackages[package].keys():
                 clist[channel] = rawclist[channel]
                 clist[channel]["order"] = channelspackages[package][channel]["order"]
